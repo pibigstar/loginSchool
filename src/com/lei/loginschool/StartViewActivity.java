@@ -20,10 +20,10 @@ import android.widget.TextView;
  */
 public class StartViewActivity extends Activity{
 
-	private int[] imgs = {R.drawable.start_1,R.drawable.start_2,R.drawable.start_3};
+	private int[] imgs = {R.drawable.start_2,R.drawable.start_3,R.drawable.start_4};
 	private ImageView img;
 	private TextView txt;
-	private int count = 3;
+	private int count = 4;
 	private Animation animation;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +35,7 @@ public class StartViewActivity extends Activity{
 
 		setContentView(R.layout.startview);
 		Random random = new Random();
-		int i = random.nextInt(2);
+		int i = random.nextInt(3);
 		img = (ImageView) findViewById(R.id.img_start);
 		img.setBackgroundResource(imgs[i]);
 		txt = (TextView) findViewById(R.id.txt_login_time);
