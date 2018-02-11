@@ -1,7 +1,19 @@
 package com.lei.loginschool;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
+
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -55,10 +67,43 @@ public class MainActivity extends Activity implements OnClickListener,OnItemSele
 		password = edit_password.getText().toString().trim();
 		strCategory = category.getSelectedItem().toString();
 		
+		try {
+			URL url = new URL("http://10.168.6.10:801/eportal/?c=ACSetting&a=Login&protocol=http:&hostname=10.168.6.10&iTermType=1&wlanuserip="+ getIpv4() +"&wlanacip=10.168.6.9&mac=00-00-00-00-00-00&ip=" + getIpv4() + "&enAdvert=0&queryACIP=0&loginMethod=1?DDDDD=%2C0%2C" + username + "%40" + strCategory + "&upass=" + password + "&R1=0&R2=0&R3=0&R6=0&para=00&0MKKey=123456&buttonClicked=&redirect_url=&err_flag=&username=&password=&user=&cmd=&Login=");
+			InputStream openStream = url.openStream();
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			byte[] b = new byte[1024];
+			int i = 0;
+			while((i = openStream.read(b))!=-1) {
+				bos.write(b,0,i);
+			}
+			
+			String result = bos.toString();
+			
+			//JSON格式
+			//JSONObject json = new JSONObject(result);
+			//json.get("success");
+			
+			if (result.contains("登录成功")) {
+				return true;
+			}else {
+				return false;
+			}
+			
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		writeToConfig();
+		return false;
+		
+	}
+
+	private void writeToConfig() {
 		Toast.makeText(this, "username:"+username+"password:"+password+"category"+tempCategory, 3000).show();
 		is_remeber = remeberMe.isChecked();
 		is_autoLogin = autoLogin.isChecked();
-		
 		editor.putString("username",username);
 		editor.putString("password", password);
 		editor.putString("category", strCategory);
@@ -67,8 +112,6 @@ public class MainActivity extends Activity implements OnClickListener,OnItemSele
 		editor.commit();//注意！！要提交
 		
 		Log.i("main", "username:"+username+"password:"+password+"category"+tempCategory);
-		return false;
-		
 	}
 
 
@@ -144,16 +187,16 @@ public class MainActivity extends Activity implements OnClickListener,OnItemSele
 	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 		switch (position) {
 		case 0:
-			tempCategory = "1";
+			tempCategory = "zzulis";
 			break;
 		case 1:
-			tempCategory = "2";
+			tempCategory = "cmcc";
 			break;
 		case 2:
-			tempCategory = "3";
+			tempCategory = "unicom";
 			break;
 		case 3:
-			tempCategory = "4";
+			tempCategory = "other";
 			break;
 		default:
 			break;
@@ -162,12 +205,41 @@ public class MainActivity extends Activity implements OnClickListener,OnItemSele
 
 	@Override
 	public void onNothingSelected(AdapterView<?> parent) {
-		
+		tempCategory = "zzulis";
 	}
 
 	@Override
 	public void onClick(View v) {
 		login();
 	}
-
+	
+	private String getIpv4() {
+		String ipv4="";
+		Enumeration<NetworkInterface> interfs;
+		try {
+			interfs = NetworkInterface.getNetworkInterfaces();
+			 int i = 1;
+		        while (interfs.hasMoreElements())  
+		        {  
+		            NetworkInterface interf = interfs.nextElement();  
+		            Enumeration<InetAddress> addres = interf.getInetAddresses();
+		            while (addres.hasMoreElements())  
+		            {  
+		                InetAddress in = addres.nextElement();  
+		                if (in instanceof Inet4Address)  
+		                {  
+		                	if (i==5) {
+		                		ipv4 = in.getHostAddress();  
+							}
+		                	
+		                }  
+		                i++;
+		            }  
+		        }
+		} catch (SocketException e) {
+			e.printStackTrace();
+		}  
+		System.out.println(ipv4);
+		return ipv4;  
+	}
 }
